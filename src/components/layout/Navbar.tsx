@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { ShoppingBag, User, MapPin, Menu, X } from "lucide-react";
+import { ShoppingBag, MapPin } from "lucide-react";
 import { useCart, useAuth } from "../../context";
 import { useState } from "react";
 
@@ -8,7 +8,6 @@ const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   const isHome = location.pathname === "/";
 

@@ -1,13 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import {
-  ShoppingBag,
-  Plus,
-  Minus,
-  Trash2,
-  ArrowRight,
-  MapPin,
-  Tag,
-} from "lucide-react";
+import { Plus, Minus, Trash2, ArrowRight, MapPin, Tag } from "lucide-react";
 import { useCart, useAuth } from "../context";
 
 const fmt = (n: number) => `₦${n.toLocaleString()}`;
