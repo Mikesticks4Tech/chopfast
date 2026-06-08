@@ -374,10 +374,6 @@ export const Checkout = () => {
   );
 };
 
-// ─── ORDERS PAGE ─────────────────────────────────────────────
-import { useLocation } from "react-router-dom";
-import { Package, Clock, CheckCircle, Truck } from "lucide-react";
-
 const STATUS_STEPS = ["confirmed", "preparing", "ready", "delivered"];
 const STATUS_LABELS: Record<string, string> = {
   confirmed: "Order confirmed",
