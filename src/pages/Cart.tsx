@@ -1,0 +1,485 @@
+import { Link, useNavigate } from "react-router-dom";
+import {
+  ShoppingBag,
+  Plus,
+  Minus,
+  Trash2,
+  ArrowRight,
+  MapPin,
+  Tag,
+} from "lucide-react";
+import { useCart, useAuth } from "../context";
+
+const fmt = (n: number) => `₦${n.toLocaleString()}`;
+
+const Cart = () => {
+  const { cart, cartTotal, increaseQty, decreaseQty, removeFromCart } =
+    useCart();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const deliveryFee = cart.length > 0 ? 500 : 0;
+  const serviceFee = cart.length > 0 ? 150 : 0;
+  const total = cartTotal + deliveryFee + serviceFee;
+
+  const handleCheckout = () => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+    navigate("/checkout");
+  };
+
+  if (cart.length === 0)
+    return (
+      <div
+        style={{
+          minHeight: "80vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 40,
+          textAlign: "center",
+        }}
+      >
+        <div style={{ fontSize: 64, marginBottom: 20 }}>🛍️</div>
+        <h2
+          style={{
+            fontFamily: "var(--display)",
+            fontSize: 24,
+            fontWeight: 800,
+            marginBottom: 8,
+          }}
+        >
+          Your cart is empty
+        </h2>
+        <p style={{ color: "var(--text2)", marginBottom: 28, fontSize: 15 }}>
+          Add some delicious Nigerian food to get started!
+        </p>
+        <Link
+          to="/"
+          style={{
+            background: "var(--orange)",
+            color: "#fff",
+            textDecoration: "none",
+            padding: "13px 28px",
+            borderRadius: 12,
+            fontFamily: "var(--mono)",
+            fontSize: 14,
+            fontWeight: 700,
+          }}
+        >
+          Browse restaurants →
+        </Link>
+      </div>
+    );
+
+  // Group cart by restaurant
+  const byRestaurant = cart.reduce(
+    (acc, item) => {
+      if (!acc[item.restaurantId])
+        acc[item.restaurantId] = { name: item.restaurantName, items: [] };
+      acc[item.restaurantId].items.push(item);
+      return acc;
+    },
+    {} as Record<string, { name: string; items: typeof cart }>,
+  );
+
+  return (
+    <div style={{ maxWidth: 1000, margin: "0 auto", padding: "40px 24px" }}>
+      <h1
+        style={{
+          fontFamily: "var(--display)",
+          fontSize: 28,
+          fontWeight: 900,
+          marginBottom: 8,
+        }}
+      >
+        Your Cart
+      </h1>
+      <p style={{ color: "var(--text2)", marginBottom: 32, fontSize: 14 }}>
+        {cart.reduce((s, c) => s + c.quantity, 0)} items from{" "}
+        {Object.keys(byRestaurant).length} restaurant
+        {Object.keys(byRestaurant).length > 1 ? "s" : ""}
+      </p>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 360px",
+          gap: 24,
+          alignItems: "start",
+        }}
+      >
+        {/* Items */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          {Object.entries(byRestaurant).map(([rId, { name, items }]) => (
+            <div
+              key={rId}
+              style={{
+                background: "var(--card)",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--radius)",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  padding: "14px 18px",
+                  borderBottom: "1px solid var(--border)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                <span style={{ fontSize: 15 }}>🍽️</span>
+                <h3
+                  style={{
+                    fontFamily: "var(--display)",
+                    fontSize: 15,
+                    fontWeight: 700,
+                  }}
+                >
+                  {name}
+                </h3>
+              </div>
+              <div>
+                {items.map((item, i) => (
+                  <div
+                    key={item.id}
+                    style={{
+                      display: "flex",
+                      gap: 12,
+                      alignItems: "center",
+                      padding: "14px 18px",
+                      borderBottom:
+                        i < items.length - 1
+                          ? "1px solid var(--border)"
+                          : "none",
+                    }}
+                  >
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      style={{
+                        width: 56,
+                        height: 56,
+                        borderRadius: 10,
+                        objectFit: "cover",
+                        flexShrink: 0,
+                      }}
+                    />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p
+                        style={{
+                          fontWeight: 600,
+                          fontSize: 14,
+                          marginBottom: 2,
+                        }}
+                      >
+                        {item.name}
+                      </p>
+                      <p
+                        style={{
+                          color: "var(--orange)",
+                          fontFamily: "var(--mono)",
+                          fontSize: 14,
+                          fontWeight: 700,
+                        }}
+                      >
+                        {fmt(item.price)}
+                      </p>
+                    </div>
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 8 }}
+                    >
+                      <button
+                        onClick={() => decreaseQty(item.id)}
+                        style={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: 7,
+                          background: "var(--card2)",
+                          border: "1px solid var(--border)",
+                          color: "var(--text)",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Minus size={12} />
+                      </button>
+                      <span
+                        style={{
+                          fontFamily: "var(--mono)",
+                          fontWeight: 700,
+                          minWidth: 16,
+                          textAlign: "center",
+                        }}
+                      >
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => increaseQty(item.id)}
+                        style={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: 7,
+                          background: "var(--orange)",
+                          border: "none",
+                          color: "#fff",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Plus size={12} />
+                      </button>
+                      <button
+                        onClick={() => removeFromCart(item.id)}
+                        style={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: 7,
+                          background: "var(--card2)",
+                          border: "1px solid var(--border)",
+                          color: "var(--muted)",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          marginLeft: 4,
+                        }}
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {/* Delivery address */}
+          <div
+            style={{
+              background: "var(--card)",
+              border: "1px solid var(--border)",
+              borderRadius: "var(--radius)",
+              padding: "16px 18px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                marginBottom: 10,
+              }}
+            >
+              <MapPin size={15} style={{ color: "var(--orange)" }} />
+              <p
+                style={{
+                  fontFamily: "var(--mono)",
+                  fontSize: 12,
+                  color: "var(--muted)",
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Delivery address
+              </p>
+            </div>
+            <p style={{ fontSize: 14, color: "var(--text2)" }}>
+              14 Bode Thomas St, Surulere, Lagos
+            </p>
+            <button
+              style={{
+                marginTop: 8,
+                fontSize: 13,
+                color: "var(--orange)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontWeight: 600,
+              }}
+            >
+              Change address →
+            </button>
+          </div>
+        </div>
+
+        {/* Summary */}
+        <div style={{ position: "sticky", top: 80 }}>
+          <div
+            style={{
+              background: "var(--card)",
+              border: "1px solid var(--border)",
+              borderRadius: "var(--radius)",
+              padding: "22px",
+            }}
+          >
+            <h3
+              style={{
+                fontFamily: "var(--display)",
+                fontSize: 18,
+                fontWeight: 800,
+                marginBottom: 20,
+              }}
+            >
+              Order Summary
+            </h3>
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+                marginBottom: 16,
+              }}
+            >
+              {[
+                ["Subtotal", fmt(cartTotal)],
+                ["Delivery fee", fmt(deliveryFee)],
+                ["Service fee", fmt(serviceFee)],
+              ].map(([label, val]) => (
+                <div
+                  key={label}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 14,
+                  }}
+                >
+                  <span style={{ color: "var(--text2)" }}>{label}</span>
+                  <span style={{ fontFamily: "var(--mono)" }}>{val}</span>
+                </div>
+              ))}
+            </div>
+
+            <div
+              style={{
+                borderTop: "1px solid var(--border)",
+                paddingTop: 14,
+                marginBottom: 20,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "var(--display)",
+                  fontWeight: 800,
+                  fontSize: 16,
+                }}
+              >
+                Total
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--display)",
+                  fontWeight: 900,
+                  fontSize: 22,
+                  color: "var(--orange)",
+                }}
+              >
+                {fmt(total)}
+              </span>
+            </div>
+
+            {/* Promo */}
+            <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+              <div
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  background: "var(--card2)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 10,
+                  padding: "10px 12px",
+                }}
+              >
+                <Tag size={13} style={{ color: "var(--muted)" }} />
+                <input
+                  placeholder="Promo code"
+                  style={{
+                    background: "none",
+                    border: "none",
+                    outline: "none",
+                    fontSize: 13,
+                    color: "var(--text)",
+                    fontFamily: "var(--body)",
+                    flex: 1,
+                  }}
+                />
+              </div>
+              <button
+                style={{
+                  padding: "10px 14px",
+                  background: "var(--card2)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 10,
+                  color: "var(--text2)",
+                  fontSize: 13,
+                  cursor: "pointer",
+                  fontWeight: 600,
+                }}
+              >
+                Apply
+              </button>
+            </div>
+
+            <button
+              onClick={handleCheckout}
+              style={{
+                width: "100%",
+                padding: "14px",
+                background: "var(--orange)",
+                color: "#fff",
+                border: "none",
+                borderRadius: 12,
+                fontFamily: "var(--mono)",
+                fontSize: 14,
+                fontWeight: 700,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                transition: "all 0.15s",
+              }}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLElement).style.background =
+                  "var(--orange2)")
+              }
+              onMouseLeave={(e) =>
+                ((e.currentTarget as HTMLElement).style.background =
+                  "var(--orange)")
+              }
+            >
+              Proceed to checkout <ArrowRight size={16} />
+            </button>
+            <p
+              style={{
+                textAlign: "center",
+                fontSize: 12,
+                color: "var(--muted)",
+                marginTop: 10,
+              }}
+            >
+              Powered by Paystack · Secure checkout
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Cart;
