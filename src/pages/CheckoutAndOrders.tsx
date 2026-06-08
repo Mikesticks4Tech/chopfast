@@ -1,7 +1,13 @@
-// ─── CHECKOUT PAGE ───────────────────────────────────────────
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Clock, CheckCircle, Truck } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import {
+  CheckCircle2,
+  CreditCard,
+  Banknote,
+  Clock,
+  Truck,
+  CheckCircle,
+} from "lucide-react";
 import { useCart, useAuth } from "../context";
 
 const fmt = (n: number) => `₦${n.toLocaleString()}`;

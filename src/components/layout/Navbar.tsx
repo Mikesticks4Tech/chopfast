@@ -1,7 +1,6 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { ShoppingBag, MapPin } from "lucide-react";
 import { useCart, useAuth } from "../../context";
-import { useState } from "react";
 
 const Navbar = () => {
   const { cartCount } = useCart();
