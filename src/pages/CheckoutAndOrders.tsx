@@ -64,7 +64,6 @@ export const Checkout = () => {
       </p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-        {/* Delivery details */}
         <div
           style={{
             background: "var(--card)",
@@ -91,7 +90,7 @@ export const Checkout = () => {
                   color: "var(--muted)",
                   fontFamily: "var(--mono)",
                   letterSpacing: "0.06em",
-                  textTransform: "uppercase",
+                  textTransform: "uppercase" as const,
                   display: "block",
                   marginBottom: 6,
                 }}
@@ -111,7 +110,7 @@ export const Checkout = () => {
                   color: "var(--muted)",
                   fontFamily: "var(--mono)",
                   letterSpacing: "0.06em",
-                  textTransform: "uppercase",
+                  textTransform: "uppercase" as const,
                   display: "block",
                   marginBottom: 6,
                 }}
@@ -136,7 +135,7 @@ export const Checkout = () => {
                   color: "var(--muted)",
                   fontFamily: "var(--mono)",
                   letterSpacing: "0.06em",
-                  textTransform: "uppercase",
+                  textTransform: "uppercase" as const,
                   display: "block",
                   marginBottom: 6,
                 }}
@@ -161,7 +160,7 @@ export const Checkout = () => {
                   color: "var(--muted)",
                   fontFamily: "var(--mono)",
                   letterSpacing: "0.06em",
-                  textTransform: "uppercase",
+                  textTransform: "uppercase" as const,
                   display: "block",
                   marginBottom: 6,
                 }}
@@ -182,7 +181,6 @@ export const Checkout = () => {
           </div>
         </div>
 
-        {/* Payment method */}
         <div
           style={{
             background: "var(--card)",
@@ -234,7 +232,7 @@ export const Checkout = () => {
                     payMethod === opt.id ? "var(--orange2)" : "var(--text2)",
                   cursor: "pointer",
                   transition: "all 0.15s",
-                  textAlign: "left",
+                  textAlign: "left" as const,
                 }}
               >
                 <div style={{ marginBottom: 6 }}>{opt.icon}</div>
@@ -255,7 +253,6 @@ export const Checkout = () => {
           </div>
         </div>
 
-        {/* Order summary */}
         <div
           style={{
             background: "var(--card)",
@@ -389,7 +386,6 @@ const mockOrders = [
     items: ["Party Jollof Rice + Chicken", "Egusi Soup + Pounded Yam"],
     total: 7700,
     status: "preparing",
-    createdAt: new Date().toISOString(),
     estimatedDelivery: "35 mins",
   },
   {
@@ -398,7 +394,6 @@ const mockOrders = [
     items: ["Beef Suya (500g)", "Suya + Fried Yam Combo"],
     total: 7000,
     status: "delivered",
-    createdAt: new Date(Date.now() - 3600000).toISOString(),
     estimatedDelivery: "Delivered",
   },
 ];
@@ -513,7 +508,7 @@ export const Orders = () => {
                             ? "var(--green)"
                             : "var(--orange)",
                         border: `1px solid ${order.status === "delivered" ? "rgba(34,197,94,0.3)" : "var(--border2)"}`,
-                        textTransform: "uppercase",
+                        textTransform: "uppercase" as const,
                       }}
                     >
                       {order.status}
@@ -546,13 +541,11 @@ export const Orders = () => {
                 </div>
               </div>
 
-              {/* Progress tracker */}
               {order.status !== "delivered" && (
                 <div
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 0,
                     marginTop: 16,
                   }}
                 >
@@ -562,7 +555,7 @@ export const Orders = () => {
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        flex: i < STATUS_STEPS.length - 1 ? 1 : "none",
+                        flex: i < STATUS_STEPS.length - 1 ? 1 : 0,
                       }}
                     >
                       <div
