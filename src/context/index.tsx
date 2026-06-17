@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import type { CartItem, MenuItem, User } from "../types";
-import { demoUser } from "../data/mockData";
+import { loginUser, registerUser } from "../api";
 
 // ─── CART CONTEXT ───────────────────────────────────────────
 type CartContextType = {
@@ -87,7 +87,10 @@ export const useCart = () => {
 // ─── AUTH CONTEXT ────────────────────────────────────────────
 type AuthContextType = {
   user: User | null;
+  token: string | null;
   isAuthenticated: boolean;
+  loading: boolean;
+  error: string;
   login: (email: string, password: string) => Promise<boolean>;
   register: (
     name: string,
@@ -101,33 +104,86 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    const stored = localStorage.getItem("chopfast_user");
+    return stored ? JSON.parse(stored) : null;
+  });
+  const [token, setToken] = useState<string | null>(() =>
+    localStorage.getItem("chopfast_token"),
+  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const login = async (email: string, _pw: string): Promise<boolean> => {
-    await new Promise((r) => setTimeout(r, 800));
-    if (email) {
-      setUser({ ...demoUser, email });
-      return true;
+  const login = async (email: string, password: string): Promise<boolean> => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await loginUser(email, password);
+      if (data.token) {
+        setUser(data);
+        setToken(data.token);
+        localStorage.setItem("chopfast_user", JSON.stringify(data));
+        localStorage.setItem("chopfast_token", data.token);
+        return true;
+      } else {
+        setError(data.message || "Login failed");
+        return false;
+      }
+    } catch {
+      setError("Network error. Please try again.");
+      return false;
+    } finally {
+      setLoading(false);
     }
-    return false;
   };
 
   const register = async (
     name: string,
     email: string,
-    _pw: string,
+    password: string,
     phone: string,
   ): Promise<boolean> => {
-    await new Promise((r) => setTimeout(r, 900));
-    setUser({ ...demoUser, name, email, phone });
-    return true;
+    setLoading(true);
+    setError("");
+    try {
+      const data = await registerUser(name, email, password, phone);
+      if (data.token) {
+        setUser(data);
+        setToken(data.token);
+        localStorage.setItem("chopfast_user", JSON.stringify(data));
+        localStorage.setItem("chopfast_token", data.token);
+        return true;
+      } else {
+        setError(data.message || "Registration failed");
+        return false;
+      }
+    } catch {
+      setError("Network error. Please try again.");
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const logout = () => setUser(null);
+  const logout = () => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem("chopfast_user");
+    localStorage.removeItem("chopfast_token");
+  };
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: !!user, login, register, logout }}
+      value={{
+        user,
+        token,
+        isAuthenticated: !!user,
+        loading,
+        error,
+        login,
+        register,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>
