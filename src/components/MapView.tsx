@@ -27,7 +27,6 @@ interface Props {
   onLocationChange: (address: string) => void;
 }
 
-// Handles click anywhere on map
 const MapClickHandler = ({
   onLocationChange,
   setClickedPos,
@@ -36,7 +35,7 @@ const MapClickHandler = ({
   setClickedPos: (pos: [number, number]) => void;
 }) => {
   useMapEvents({
-    click: async (e) => {
+    click: async (e: L.LeafletMouseEvent) => {
       const { lat, lng } = e.latlng;
       setClickedPos([lat, lng]);
       try {
@@ -106,7 +105,7 @@ const MapView = ({
 
   return (
     <MapContainer
-      center={userLocation}
+      center={userLocation as L.LatLngExpression}
       zoom={12}
       style={{ height: 380, width: "100%", borderRadius: 16 }}
     >
@@ -116,7 +115,7 @@ const MapView = ({
         setClickedPos={setClickedPos}
       />
       <Circle
-        center={userLocation}
+        center={userLocation as L.LatLngExpression}
         radius={800}
         pathOptions={{
           color: "orange",
@@ -124,17 +123,15 @@ const MapView = ({
           fillOpacity: 0.1,
         }}
       />
-      {/* Clicked position marker */}
       {clickedPos && (
-        <Marker position={clickedPos}>
+        <Marker position={clickedPos as L.LatLngExpression}>
           <Popup>📍 Selected location</Popup>
         </Marker>
       )}
-      {/* Restaurant markers */}
       {restaurants.map((r) => (
         <Marker
           key={r.id}
-          position={[r.lat, r.lng]}
+          position={[r.lat, r.lng] as L.LatLngExpression}
           eventHandlers={{
             click: () => {
               onSelectRestaurant(r);
