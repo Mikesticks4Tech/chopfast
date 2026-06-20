@@ -25,8 +25,6 @@ export type User = {
   phone?: string;
   role: UserRole;
   address?: string;
-  lat: number;
-  lng: number;
 };
 
 export type MenuItem = {
@@ -40,9 +38,7 @@ export type MenuItem = {
   popular?: boolean;
   spicy?: boolean;
   available: boolean;
-  prepTime: number; // minutes
-  lat: number;
-  lng: number;
+  prepTime: number;
 };
 
 export type Restaurant = {
@@ -68,8 +64,6 @@ export type CartItem = MenuItem & {
   quantity: number;
   restaurantId: string;
   restaurantName: string;
-  lat: number;
-  lng: number;
 };
 
 export type Order = {
@@ -86,6 +80,4 @@ export type Order = {
   estimatedDelivery: string;
   paymentMethod: "paystack" | "cash";
   paymentStatus: "pending" | "paid";
-  lat: number;
-  lng: number;
 };
