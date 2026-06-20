@@ -2,7 +2,8 @@ import { useState, useMemo } from "react";
 import { Search, Star, Clock, ChevronRight, Flame, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { restaurants } from "../data/mockData";
-import type { FoodCategory } from "../types";
+import type { FoodCategory, Restaurant } from "../types";
+import MapView from "../components/MapView";
 
 const CATEGORIES: { label: FoodCategory | "All"; emoji: string }[] = [
   { label: "All", emoji: "🍽️" },
@@ -20,6 +21,9 @@ const fmt = (n: number) => `₦${n.toLocaleString()}`;
 const Home = () => {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("All");
+  const [selectedLocation, setSelectedLocation] = useState<string>(
+    "Detecting your location...",
+  );
 
   const filtered = useMemo(() => {
     let r = [...restaurants];
@@ -35,6 +39,10 @@ const Home = () => {
   }, [search, activeCategory]);
 
   const featured = restaurants.filter((r) => r.isOpen).slice(0, 3);
+
+  const handleSelectRestaurant = (restaurant: Restaurant) => {
+    setSelectedLocation(restaurant.address);
+  };
 
   return (
     <div style={{ minHeight: "100vh" }}>
@@ -84,7 +92,7 @@ const Home = () => {
               marginBottom: 24,
             }}
           >
-            <span style={{ fontSize: 12 }}>⚡</span>
+            <span style={{ fontSize: 12 }}>📍</span>
             <span
               style={{
                 fontFamily: "var(--mono)",
@@ -93,7 +101,7 @@ const Home = () => {
                 fontWeight: 600,
               }}
             >
-              Delivering across Lagos in 30 mins
+              {selectedLocation}
             </span>
           </div>
 
@@ -485,6 +493,46 @@ const Home = () => {
                 </div>
               </Link>
             ))}
+          </div>
+        </section>
+      )}
+
+      {/* MAP SECTION */}
+      {activeCategory === "All" && !search && (
+        <section
+          style={{ padding: "0 24px 40px", maxWidth: 1200, margin: "0 auto" }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 16,
+            }}
+          >
+            <span style={{ fontSize: 18 }}>📍</span>
+            <h2
+              style={{
+                fontFamily: "var(--display)",
+                fontSize: 22,
+                fontWeight: 800,
+              }}
+            >
+              Restaurants near you
+            </h2>
+          </div>
+          <div
+            style={{
+              borderRadius: 16,
+              overflow: "hidden",
+              border: "1px solid var(--border)",
+            }}
+          >
+            <MapView
+              restaurants={restaurants}
+              onSelectRestaurant={handleSelectRestaurant}
+              onLocationChange={(address) => setSelectedLocation(address)}
+            />
           </div>
         </section>
       )}

@@ -19,6 +19,8 @@ export const restaurants: Restaurant[] = [
     address: "14 Bode Thomas St, Surulere, Lagos",
     isOpen: true,
     tags: ["Jollof Rice", "Egusi", "Pounded Yam", "Popular"],
+    lat: 6.4969,
+    lng: 3.3544,
   },
   {
     id: "r2",
@@ -38,6 +40,8 @@ export const restaurants: Restaurant[] = [
     address: "7 Allen Avenue, Ikeja, Lagos",
     isOpen: true,
     tags: ["Suya", "Grilled", "BBQ", "Spicy"],
+    lat: 6.6018,
+    lng: 3.3515,
   },
   {
     id: "r3",
@@ -57,6 +61,8 @@ export const restaurants: Restaurant[] = [
     address: "22 Broad Street, Lagos Island",
     isOpen: true,
     tags: ["Puff Puff", "Akara", "Snacks", "Fast"],
+    lat: 6.4531,
+    lng: 3.3958,
   },
   {
     id: "r4",
@@ -76,6 +82,8 @@ export const restaurants: Restaurant[] = [
     address: "5 Adeola Odeku, Victoria Island, Lagos",
     isOpen: true,
     tags: ["Fried Rice", "Noodles", "Fusion", "Premium"],
+    lat: 6.4281,
+    lng: 3.4219,
   },
   {
     id: "r5",
@@ -95,6 +103,8 @@ export const restaurants: Restaurant[] = [
     address: "33 Awolowo Road, Ikoyi, Lagos",
     isOpen: true,
     tags: ["Egusi", "Pounded Yam", "Afang", "Traditional"],
+    lat: 6.4474,
+    lng: 3.4553,
   },
   {
     id: "r6",
@@ -114,6 +124,8 @@ export const restaurants: Restaurant[] = [
     address: "1 Ozumba Mbadiwe, Victoria Island, Lagos",
     isOpen: false,
     tags: ["Burgers", "Pasta", "Steaks", "Premium"],
+    lat: 6.428,
+    lng: 3.4106,
   },
 ];
 
@@ -418,7 +430,7 @@ export const menuItems: MenuItem[] = [
 
 export const demoUser = {
   id: "u1",
-  name: "Mike Adeyemi",
+  name: "Mike Idowu",
   email: "mike@chopfast.ng",
   phone: "08012345678",
   role: "customer" as const,
