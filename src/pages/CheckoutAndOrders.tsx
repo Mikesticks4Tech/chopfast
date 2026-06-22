@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   CheckCircle2,
@@ -7,8 +7,12 @@ import {
   Clock,
   Truck,
   CheckCircle,
+  Loader2,
 } from "lucide-react";
 import { useCart, useAuth } from "../context";
+import { usePaystackPayment } from "react-paystack";
+import { placeOrder, getMyOrders } from "../api";
+import type { Order } from "../types";
 
 const fmt = (n: number) => `₦${n.toLocaleString()}`;
 
@@ -26,10 +30,11 @@ const inputStyle: React.CSSProperties = {
 
 export const Checkout = () => {
   const { cart, cartTotal, clearCart } = useCart();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const navigate = useNavigate();
   const [payMethod, setPayMethod] = useState<"paystack" | "cash">("paystack");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({
     address: user?.address ?? "",
     phone: user?.phone ?? "",
@@ -40,11 +45,89 @@ export const Checkout = () => {
   const serviceFee = 150;
   const total = cartTotal + deliveryFee + serviceFee;
 
-  const handleOrder = async () => {
+  const paystackConfig = {
+    reference: `chopfast_${Date.now()}`,
+    email: user?.email ?? "customer@chopfast.ng",
+    amount: total * 100,
+    publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
+  };
+
+  const initializePayment = usePaystackPayment(paystackConfig);
+
+  // This actually saves the order to MongoDB via your backend.
+  // Called after a successful Paystack payment OR for cash on delivery.
+  const saveOrderToBackend = async (
+    paymentMethod: "paystack" | "cash",
+    paymentStatus: "paid" | "pending",
+  ) => {
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    if (!form.address || !form.phone) {
+      setError("Please fill in your address and phone number.");
+      return;
+    }
+
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 2000));
-    clearCart();
-    navigate("/orders?success=true");
+    setError("");
+    try {
+      const firstItem = cart[0];
+      await placeOrder(
+        {
+          restaurantId: firstItem.restaurantId,
+          restaurantName: firstItem.restaurantName,
+          items: cart.map((item) => ({
+            menuItemId: item._id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            image: item.image,
+          })),
+          total,
+          deliveryFee,
+          address: form.address,
+          phone: form.phone,
+          note: form.note,
+          paymentMethod,
+          paymentStatus,
+        },
+        token,
+      );
+
+      clearCart();
+      navigate("/orders?success=true");
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to save your order. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOrder = () => {
+    if (!form.address || !form.phone) {
+      setError("Please fill in your address and phone number.");
+      return;
+    }
+    setError("");
+
+    if (payMethod === "paystack") {
+      initializePayment({
+        onSuccess: () => {
+          // Payment succeeded on Paystack's side — NOW save the order to our DB.
+          saveOrderToBackend("paystack", "paid");
+        },
+        onClose: () => {
+          console.log("Payment popup closed without completing");
+        },
+      });
+    } else {
+      saveOrderToBackend("cash", "pending");
+    }
   };
 
   return (
@@ -62,6 +145,22 @@ export const Checkout = () => {
       <p style={{ color: "var(--text2)", marginBottom: 32, fontSize: 14 }}>
         Complete your order details below
       </p>
+
+      {error && (
+        <div
+          style={{
+            background: "rgba(239,68,68,0.1)",
+            border: "1px solid rgba(239,68,68,0.3)",
+            borderRadius: 10,
+            padding: "12px 16px",
+            color: "#ef4444",
+            fontSize: 13,
+            marginBottom: 20,
+          }}
+        >
+          {error}
+        </div>
+      )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         <div
@@ -115,7 +214,7 @@ export const Checkout = () => {
                   marginBottom: 6,
                 }}
               >
-                Phone number
+                Phone number *
               </label>
               <input
                 value={form.phone}
@@ -140,7 +239,7 @@ export const Checkout = () => {
                   marginBottom: 6,
                 }}
               >
-                Delivery address
+                Delivery address *
               </label>
               <input
                 value={form.address}
@@ -273,7 +372,7 @@ export const Checkout = () => {
           </h3>
           {cart.map((item) => (
             <div
-              key={item.id}
+              key={item._id}
               style={{
                 display: "flex",
                 justifyContent: "space-between",
@@ -364,44 +463,63 @@ export const Checkout = () => {
             gap: 8,
           }}
         >
-          {loading ? "Placing order..." : `Place order · ${fmt(total)}`}
+          {loading ? (
+            <>
+              <Loader2
+                size={16}
+                style={{ animation: "spin 1s linear infinite" }}
+              />{" "}
+              Saving order...
+            </>
+          ) : (
+            `Place order · ${fmt(total)}`
+          )}
         </button>
       </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 };
 
+// ─── ORDERS PAGE (real data from backend) ─────────────────────
+
 const STATUS_STEPS = ["confirmed", "preparing", "ready", "delivered"];
 const STATUS_LABELS: Record<string, string> = {
+  pending: "Order placed",
   confirmed: "Order confirmed",
   preparing: "Preparing your food",
   ready: "Ready for pickup",
   delivered: "Delivered 🎉",
 };
 
-const mockOrders = [
-  {
-    id: "ORD-001",
-    restaurantName: "Mama Titi's Kitchen",
-    items: ["Party Jollof Rice + Chicken", "Egusi Soup + Pounded Yam"],
-    total: 7700,
-    status: "preparing",
-    estimatedDelivery: "35 mins",
-  },
-  {
-    id: "ORD-002",
-    restaurantName: "Suya Spot Lagos",
-    items: ["Beef Suya (500g)", "Suya + Fried Yam Combo"],
-    total: 7000,
-    status: "delivered",
-    estimatedDelivery: "Delivered",
-  },
-];
-
 export const Orders = () => {
   const location = useLocation();
+  const { token } = useAuth();
+  const navigate = useNavigate();
   const justOrdered =
     new URLSearchParams(location.search).get("success") === "true";
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    const fetchOrders = async () => {
+      setLoading(true);
+      try {
+        const data = await getMyOrders(token);
+        setOrders(Array.isArray(data) ? data : []);
+      } catch {
+        setError("Couldn't load your orders.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrders();
+  }, [token, navigate]);
 
   return (
     <div style={{ maxWidth: 700, margin: "0 auto", padding: "40px 24px" }}>
@@ -452,12 +570,56 @@ export const Orders = () => {
         Your Orders
       </h1>
 
+      {loading && (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            padding: "60px 0",
+            gap: 12,
+          }}
+        >
+          <Loader2
+            size={24}
+            style={{
+              color: "var(--orange)",
+              animation: "spin 1s linear infinite",
+            }}
+          />
+          <p style={{ color: "var(--text2)", fontSize: 14 }}>
+            Loading your orders...
+          </p>
+        </div>
+      )}
+
+      {!loading && error && (
+        <p
+          style={{
+            textAlign: "center",
+            color: "var(--text2)",
+            padding: "40px 0",
+          }}
+        >
+          {error}
+        </p>
+      )}
+
+      {!loading && !error && orders.length === 0 && (
+        <div style={{ textAlign: "center", padding: "60px 0" }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>📦</div>
+          <p style={{ color: "var(--text2)", fontSize: 15 }}>
+            You haven't placed any orders yet.
+          </p>
+        </div>
+      )}
+
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        {mockOrders.map((order) => {
+        {orders.map((order) => {
           const stepIndex = STATUS_STEPS.indexOf(order.status);
           return (
             <div
-              key={order.id}
+              key={order._id}
               style={{
                 background: "var(--card)",
                 border: "1px solid var(--border)",
@@ -513,9 +675,25 @@ export const Orders = () => {
                     >
                       {order.status}
                     </span>
+                    {order.paymentStatus === "paid" && (
+                      <span
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          fontFamily: "var(--mono)",
+                          padding: "3px 8px",
+                          borderRadius: 99,
+                          background: "rgba(34,197,94,0.1)",
+                          color: "var(--green)",
+                          border: "1px solid rgba(34,197,94,0.3)",
+                        }}
+                      >
+                        PAID
+                      </span>
+                    )}
                   </div>
                   <p style={{ fontSize: 12.5, color: "var(--text2)" }}>
-                    {order.items.join(" · ")}
+                    {order.items.map((i) => i.name).join(" · ")}
                   </p>
                 </div>
                 <div style={{ textAlign: "right" }}>
@@ -536,12 +714,12 @@ export const Orders = () => {
                       marginTop: 2,
                     }}
                   >
-                    {order.id}
+                    {order._id.slice(-8).toUpperCase()}
                   </p>
                 </div>
               </div>
 
-              {order.status !== "delivered" && (
+              {order.status !== "delivered" && order.status !== "cancelled" && (
                 <div
                   style={{
                     display: "flex",
@@ -649,6 +827,7 @@ export const Orders = () => {
           );
         })}
       </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 };
