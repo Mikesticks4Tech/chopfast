@@ -29,7 +29,7 @@ export type User = {
 
 export type MenuItem = {
   _id: string;
-  id?: string; // keep for backward compat with mock data
+  id?: string;
   restaurantId: string;
   name: string;
   description: string;
