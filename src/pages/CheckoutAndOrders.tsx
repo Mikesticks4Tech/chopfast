@@ -54,8 +54,6 @@ export const Checkout = () => {
 
   const initializePayment = usePaystackPayment(paystackConfig);
 
-  // This actually saves the order to MongoDB via your backend.
-  // Called after a successful Paystack payment OR for cash on delivery.
   const saveOrderToBackend = async (
     paymentMethod: "paystack" | "cash",
     paymentStatus: "paid" | "pending",
@@ -118,7 +116,6 @@ export const Checkout = () => {
     if (payMethod === "paystack") {
       initializePayment({
         onSuccess: () => {
-          // Payment succeeded on Paystack's side — NOW save the order to our DB.
           saveOrderToBackend("paystack", "paid");
         },
         onClose: () => {
@@ -370,24 +367,27 @@ export const Checkout = () => {
           >
             Order summary
           </h3>
-          {cart.map((item) => (
-            <div
-              key={item._id}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                fontSize: 13.5,
-                marginBottom: 8,
-              }}
-            >
-              <span style={{ color: "var(--text2)" }}>
-                {item.name} × {item.quantity}
-              </span>
-              <span style={{ fontFamily: "var(--mono)" }}>
-                {fmt(item.price * item.quantity)}
-              </span>
-            </div>
-          ))}
+          {cart.map((item) => {
+            const itemId = item._id ?? item.id ?? item.name ?? "";
+            return (
+              <div
+                key={itemId}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontSize: 13.5,
+                  marginBottom: 8,
+                }}
+              >
+                <span style={{ color: "var(--text2)" }}>
+                  {item.name} × {item.quantity}
+                </span>
+                <span style={{ fontFamily: "var(--mono)" }}>
+                  {fmt(item.price * item.quantity)}
+                </span>
+              </div>
+            );
+          })}
           <div
             style={{
               borderTop: "1px solid var(--border)",
@@ -481,7 +481,7 @@ export const Checkout = () => {
   );
 };
 
-// ─── ORDERS PAGE (real data from backend) ─────────────────────
+// ─── ORDERS PAGE ─────────────────────
 
 const STATUS_STEPS = ["confirmed", "preparing", "ready", "delivered"];
 const STATUS_LABELS: Record<string, string> = {
@@ -616,10 +616,12 @@ export const Orders = () => {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {orders.map((order) => {
+          // ✅ Fix: safely handle _id possibly being undefined
+          const orderId = order._id ?? order.id ?? "";
           const stepIndex = STATUS_STEPS.indexOf(order.status);
           return (
             <div
-              key={order._id}
+              key={orderId}
               style={{
                 background: "var(--card)",
                 border: "1px solid var(--border)",
@@ -714,7 +716,8 @@ export const Orders = () => {
                       marginTop: 2,
                     }}
                   >
-                    {order._id.slice(-8).toUpperCase()}
+                    {/* ✅ Fix: was order._id.slice(-8) — now safe */}
+                    {orderId.slice(-8).toUpperCase()}
                   </p>
                 </div>
               </div>

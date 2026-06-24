@@ -134,120 +134,127 @@ const Cart = () => {
                 </h3>
               </div>
               <div>
-                {items.map((item, i) => (
-                  <div
-                    key={item.id}
-                    style={{
-                      display: "flex",
-                      gap: 12,
-                      alignItems: "center",
-                      padding: "14px 18px",
-                      borderBottom:
-                        i < items.length - 1
-                          ? "1px solid var(--border)"
-                          : "none",
-                    }}
-                  >
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      style={{
-                        width: 56,
-                        height: 56,
-                        borderRadius: 10,
-                        objectFit: "cover",
-                        flexShrink: 0,
-                      }}
-                    />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p
-                        style={{
-                          fontWeight: 600,
-                          fontSize: 14,
-                          marginBottom: 2,
-                        }}
-                      >
-                        {item.name}
-                      </p>
-                      <p
-                        style={{
-                          color: "var(--orange)",
-                          fontFamily: "var(--mono)",
-                          fontSize: 14,
-                          fontWeight: 700,
-                        }}
-                      >
-                        {fmt(item.price)}
-                      </p>
-                    </div>
+                {items.map((item, i) => {
+                  const itemId = item.id ?? item._id ?? item.name ?? "";
+                  return (
                     <div
-                      style={{ display: "flex", alignItems: "center", gap: 8 }}
+                      key={itemId}
+                      style={{
+                        display: "flex",
+                        gap: 12,
+                        alignItems: "center",
+                        padding: "14px 18px",
+                        borderBottom:
+                          i < items.length - 1
+                            ? "1px solid var(--border)"
+                            : "none",
+                      }}
                     >
-                      <button
-                        onClick={() => decreaseQty(item.id)}
+                      <img
+                        src={item.image}
+                        alt={item.name}
                         style={{
-                          width: 28,
-                          height: 28,
-                          borderRadius: 7,
-                          background: "var(--card2)",
-                          border: "1px solid var(--border)",
-                          color: "var(--text)",
-                          cursor: "pointer",
+                          width: 56,
+                          height: 56,
+                          borderRadius: 10,
+                          objectFit: "cover",
+                          flexShrink: 0,
+                        }}
+                      />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p
+                          style={{
+                            fontWeight: 600,
+                            fontSize: 14,
+                            marginBottom: 2,
+                          }}
+                        >
+                          {item.name}
+                        </p>
+                        <p
+                          style={{
+                            color: "var(--orange)",
+                            fontFamily: "var(--mono)",
+                            fontSize: 14,
+                            fontWeight: 700,
+                          }}
+                        >
+                          {fmt(item.price)}
+                        </p>
+                      </div>
+                      <div
+                        style={{
                           display: "flex",
                           alignItems: "center",
-                          justifyContent: "center",
+                          gap: 8,
                         }}
                       >
-                        <Minus size={12} />
-                      </button>
-                      <span
-                        style={{
-                          fontFamily: "var(--mono)",
-                          fontWeight: 700,
-                          minWidth: 16,
-                          textAlign: "center",
-                        }}
-                      >
-                        {item.quantity}
-                      </span>
-                      <button
-                        onClick={() => increaseQty(item.id)}
-                        style={{
-                          width: 28,
-                          height: 28,
-                          borderRadius: 7,
-                          background: "var(--orange)",
-                          border: "none",
-                          color: "#fff",
-                          cursor: "pointer",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <Plus size={12} />
-                      </button>
-                      <button
-                        onClick={() => removeFromCart(item.id)}
-                        style={{
-                          width: 28,
-                          height: 28,
-                          borderRadius: 7,
-                          background: "var(--card2)",
-                          border: "1px solid var(--border)",
-                          color: "var(--muted)",
-                          cursor: "pointer",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          marginLeft: 4,
-                        }}
-                      >
-                        <Trash2 size={12} />
-                      </button>
+                        <button
+                          onClick={() => decreaseQty(itemId)}
+                          style={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: 7,
+                            background: "var(--card2)",
+                            border: "1px solid var(--border)",
+                            color: "var(--text)",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Minus size={12} />
+                        </button>
+                        <span
+                          style={{
+                            fontFamily: "var(--mono)",
+                            fontWeight: 700,
+                            minWidth: 16,
+                            textAlign: "center",
+                          }}
+                        >
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => increaseQty(itemId)}
+                          style={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: 7,
+                            background: "var(--orange)",
+                            border: "none",
+                            color: "#fff",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Plus size={12} />
+                        </button>
+                        <button
+                          onClick={() => removeFromCart(itemId)}
+                          style={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: 7,
+                            background: "var(--card2)",
+                            border: "1px solid var(--border)",
+                            color: "var(--muted)",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            marginLeft: 4,
+                          }}
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}
