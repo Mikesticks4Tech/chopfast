@@ -16,7 +16,7 @@ import { useState } from "react";
 const fmt = (n: number) => `₦${n.toLocaleString()}`;
 
 const MenuPage = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { cart, addToCart, increaseQty, decreaseQty } = useCart();
   const [added, setAdded] = useState<string | null>(null);
@@ -46,8 +46,10 @@ const MenuPage = () => {
     );
 
   const handleAdd = (item: (typeof items)[0]) => {
-    addToCart(item, restaurant.id, restaurant.name);
-    setAdded(item.id);
+    const itemId = item.id ?? "";
+    const restaurantId = restaurant.id ?? "";
+    addToCart(item, restaurantId, restaurant.name);
+    setAdded(itemId);
     setTimeout(() => setAdded(null), 1500);
   };
 
@@ -228,11 +230,12 @@ const MenuPage = () => {
               {items
                 .filter((m) => m.category === cat)
                 .map((item) => {
-                  const qty = getQty(item.id);
-                  const justAdded = added === item.id;
+                  const itemId = item.id ?? item.name ?? "";
+                  const qty = getQty(itemId);
+                  const justAdded = added === itemId;
                   return (
                     <div
-                      key={item.id}
+                      key={itemId}
                       style={{
                         display: "flex",
                         gap: 14,
@@ -350,7 +353,7 @@ const MenuPage = () => {
                                 }}
                               >
                                 <button
-                                  onClick={() => decreaseQty(item.id)}
+                                  onClick={() => decreaseQty(itemId)}
                                   style={{
                                     width: 30,
                                     height: 30,
@@ -377,7 +380,7 @@ const MenuPage = () => {
                                   {qty}
                                 </span>
                                 <button
-                                  onClick={() => increaseQty(item.id)}
+                                  onClick={() => increaseQty(itemId)}
                                   style={{
                                     width: 30,
                                     height: 30,
