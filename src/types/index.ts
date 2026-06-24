@@ -19,16 +19,18 @@ export type OrderStatus =
 export type UserRole = "customer" | "admin" | "superadmin";
 
 export type User = {
-  id: string;
+  _id?: string;
+  id?: string;
   name: string;
   email: string;
   phone?: string;
   role: UserRole;
   address?: string;
+  token?: string;
 };
 
 export type MenuItem = {
-  _id: string;
+  _id?: string;
   id?: string;
   restaurantId: string;
   name: string;
@@ -43,7 +45,8 @@ export type MenuItem = {
 };
 
 export type Restaurant = {
-  id: string;
+  _id?: string;
+  id?: string;
   name: string;
   description: string;
   image: string;
@@ -57,8 +60,8 @@ export type Restaurant = {
   address: string;
   isOpen: boolean;
   tags: string[];
-  lat: number;
-  lng: number;
+  lat?: number;
+  lng?: number;
 };
 
 export type CartItem = MenuItem & {
@@ -68,7 +71,7 @@ export type CartItem = MenuItem & {
 };
 
 export type Order = {
-  _id: string;
+  _id?: string;
   id?: string;
   userId: string;
   restaurantId: string;
