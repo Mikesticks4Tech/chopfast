@@ -29,6 +29,7 @@ export type User = {
 
 export type MenuItem = {
   _id: string;
+  id?: string; // keep for backward compat with mock data
   restaurantId: string;
   name: string;
   description: string;
@@ -61,7 +62,6 @@ export type Restaurant = {
 };
 
 export type CartItem = MenuItem & {
-  _id: string;
   quantity: number;
   restaurantId: string;
   restaurantName: string;
@@ -69,6 +69,7 @@ export type CartItem = MenuItem & {
 
 export type Order = {
   _id: string;
+  id?: string;
   userId: string;
   restaurantId: string;
   restaurantName: string;
