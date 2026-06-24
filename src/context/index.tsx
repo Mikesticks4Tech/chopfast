@@ -35,12 +35,15 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     restaurantName: string,
   ) => {
     setCart((prev) => {
-      const existing = prev.find((c) => c.id === item.id);
+      const existing = prev.find((c) => c._id === item._id);
       if (existing)
         return prev.map((c) =>
-          c.id === item.id ? { ...c, quantity: c.quantity + 1 } : c,
+          c._id === item._id ? { ...c, quantity: c.quantity + 1 } : c,
         );
-      return [...prev, { ...item, quantity: 1, restaurantId, restaurantName }];
+      return [
+        ...prev,
+        { ...item, _id: item._id, quantity: 1, restaurantId, restaurantName },
+      ];
     });
   };
 

@@ -28,7 +28,7 @@ export type User = {
 };
 
 export type MenuItem = {
-  id: string;
+  _id: string;
   restaurantId: string;
   name: string;
   description: string;
