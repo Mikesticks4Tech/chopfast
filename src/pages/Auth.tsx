@@ -202,6 +202,18 @@ export const Login = () => {
                 </>
               )}
             </button>
+            {loading && (
+              <p
+                style={{
+                  textAlign: "center",
+                  fontSize: 12,
+                  color: "rgba(255,255,255,0.35)",
+                  marginTop: 4,
+                }}
+              >
+                ⏳ This may take a few seconds on first load...
+              </p>
+            )}
           </form>
         </div>
 
@@ -254,6 +266,7 @@ export const Register = () => {
     const ok = await register(form.name, form.email, form.password, form.phone);
     setLoading(false);
     if (ok) navigate("/");
+    else setError("Registration failed. Please try again.");
   };
 
   return (
@@ -310,6 +323,7 @@ export const Register = () => {
               {error}
             </div>
           )}
+
           <form
             onSubmit={handleSubmit}
             style={{ display: "flex", flexDirection: "column", gap: 14 }}
@@ -363,6 +377,7 @@ export const Register = () => {
                 />
               </div>
             ))}
+
             <div>
               <label
                 style={{
@@ -410,6 +425,7 @@ export const Register = () => {
                 </button>
               </div>
             </div>
+
             <button
               type="submit"
               disabled={loading}
@@ -442,8 +458,22 @@ export const Register = () => {
                 </>
               )}
             </button>
+
+            {loading && (
+              <p
+                style={{
+                  textAlign: "center",
+                  fontSize: 12,
+                  color: "rgba(255,255,255,0.35)",
+                  marginTop: 4,
+                }}
+              >
+                ⏳ First load may take up to 30 seconds...
+              </p>
+            )}
           </form>
         </div>
+
         <p
           style={{
             textAlign: "center",
