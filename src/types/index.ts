@@ -61,17 +61,24 @@ export type Restaurant = {
 };
 
 export type CartItem = MenuItem & {
+  _id: string;
   quantity: number;
   restaurantId: string;
   restaurantName: string;
 };
 
 export type Order = {
-  id: string;
+  _id: string;
   userId: string;
   restaurantId: string;
   restaurantName: string;
-  items: CartItem[];
+  items: {
+    _id?: string;
+    name: string;
+    price: number;
+    quantity: number;
+    image: string;
+  }[];
   total: number;
   deliveryFee: number;
   status: OrderStatus;
